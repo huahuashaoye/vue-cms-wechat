@@ -1,32 +1,52 @@
 <template>
-	<div class="box">
-		<el-card class="box-card role">
+	<div class="display">
+		<el-card class="box-card box">
 			<div slot="header" class="clearfix">
-				<span>角色管理</span>
-				<el-button style="float: right; padding: 5px 5px" type="primary" plain @click='openInsertModel' icon="el-icon-setting">添加角色</el-button>
+				<span>卡片名称</span>
+				<el-button style="float: right; padding: 10px 20px" type="primary" plain icon="el-icon-circle-plus-outline" @click="handleInsert">添加角色</el-button>
 			</div>
-			<div class="text item">
-				<el-table :data="tableData" style="width: 100%">
-					<el-table-column label="#" type="index" width="80">
-					</el-table-column>
-					<el-table-column label="分类">
-						<template slot-scope="scope">
-							<div slot="reference" class="name-wrapper">
-								<el-tag size="medium">{{ scope.row.name }}</el-tag>
-							</div>
-						</template>
-					</el-table-column>
-					<el-table-column label="操作" width="250">
-						<template slot-scope="scope">
-							<el-button @click="handleEdit(scope.row.id, scope.row.name,scope.$index)" type="primary" plain :disabled='scope.row.name==="超级管理员"'><i
-								 class="el-icon-edit"></i></el-button>
-							<el-button type="danger" @click="handleDelete(scope.row.id,scope.$index)" plain :disabled='scope.row.name==="超级管理员"'><i
-								 class="el-icon-delete"></i></el-button>
-							<el-button type="primary" plain icon="el-icon-setting" @click="handleSetting(scope.row.id,scope.$index)"></el-button>
-						</template>
-					</el-table-column>
-				</el-table>
-			</div>
+			<el-table :data="tableData" style="width: 100%">
+				<el-table-column prop="id" label="#" width="150">
+				</el-table-column>
+				<el-table-column prop="name" label="角色" width="150">
+					<template slot-scope="scope">
+						<el-tag :class="{color:scope.row.name === '超级管理员'}">{{scope.row.name}}</el-tag>
+					</template>
+				</el-table-column>
+
+				<el-table-column label="操作">
+					<template slot-scope="scope">
+						<el-button type="primary" plain icon="el-icon-edit" @click="handleInfo(scope.row.id,scope.row.name,scope.$index)"
+						 :disabled="scope.row.name === '超级管理员'"></el-button>
+						<el-button type="danger" plain icon="el-icon-delete" @click="removeRole(scope.row.id,scope.$index)" :disabled="scope.row.name === '超级管理员'"></el-button>
+						<el-button type="primary" plain icon="el-icon-setting" @click="handleSetting(scope.row.id,scope.$index)"></el-button>
+					</template>
+				</el-table-column>
+			</el-table>
+			<!-- 编辑模态框 -->
+			<!-- <el-dialog title="编辑角色" :visible.sync="dialogFormVisible">
+				<el-form ref="form" :model="form" :rules="rules" label-position="left">
+					<el-form-item label="名称" :label-width="formLabelWidth" prop="name">
+						<el-input v-model="form.name" autocomplete="off"></el-input>
+					</el-form-item>
+				</el-form>
+				<div slot="footer" class="dialog-footer">
+					<el-button @click="dialogFormVisible = false">取 消</el-button>
+					<el-button type="primary" @click="submitForm('form')">确 定</el-button>
+				</div>
+			</el-dialog> -->
+			<!-- 添加模态框 -->
+			<el-dialog title="添加角色" :visible.sync="insertModalShow">
+				<el-form ref="insertForm" :model="insertForm" :rules="rules" label-position="left">
+					<el-form-item label="名称" :label-width="formLabelWidth" prop="name">
+						<el-input v-model="insertForm.name" autocomplete="off"></el-input>
+					</el-form-item>
+				</el-form>
+				<div slot="footer" class="dialog-footer">
+					<el-button @click="insertModalShow = false">取 消</el-button>
+					<el-button type="primary" @click="submitInsertForm('insertForm')">确 定</el-button>
+				</div>
+			</el-dialog>
 		</el-card>
 		<!-- 设置模态框 -->
 		<div class="layout">
@@ -42,12 +62,12 @@
 				</ul>
 			</el-card>
 		</div>
-
 	</div>
 </template>
 
 <script>
 	import { Rolo } from '@/api/index';
+
 	export default {
 		data() {
 			return {
@@ -55,8 +75,10 @@
 				role_id: '', //角色id
 				options_1st: [],
 
+				formLabelWidth: '120px',
+				dialogFormVisible: false, //编辑框
+				insertModalShow: false, //添加角色框
 				tableData: [],
-				isShowDialog: false,
 				form: { //编辑的信息
 					id: '',
 					name: '',
@@ -73,7 +95,6 @@
 						{ required: true, message: '请输入名称', trigger: 'blur' },
 						{ min: 1, max: 15, message: '长度在 1 到 15 个字符', trigger: 'blur' }
 					],
-					
 				}
 			}
 		},
@@ -111,7 +132,8 @@
 					}
 				}
 			},
-			async checkedSingle(menu_id, idx, i) {
+
+			async checkedSingle(menu_id,idx,i) {
 				if (this.options_1st[idx].children[i].checked == false) {
 					this.roleMenu.role_id = this.role_id;
 					this.roleMenu.menu_id = menu_id;
@@ -165,12 +187,54 @@
 					this.options_1st = data;
 				}
 			},
-			//编辑
-			handleEdit(id, name, index) {
-				this.$prompt('请修改信息', '修改', {
+			//获取角色信息
+			async loadList() { /* 加载列表数据 */
+				let { status, data } = await Rolo.list();
+				if (status) {
+					this.tableData = data;
+				}
+			},
+			//添加角色信息
+			handleInsert() {
+				this.insertModalShow = true;
+			},
+			submitInsertForm(formName) {
+				this.$refs[formName].validate(async (valid) => {
+					if (valid) {
+						let { status, msg } = await Rolo.insert(this.insertForm);
+						if (status) {
+							this.$message.success('添加成功!');
+							this.insertModalShow = false;
+							//更新DOM====================
+							this.loadList();
+						}
+					} else {
+						this.$message.info('添加失败!');
+						return false;
+					}
+				});
+			},
+			//删除角色信息
+			removeRolo(id, index) {
+				this.$confirm('此操作将永久删除该角色, 是否继续?', {
+					type: 'warning'
+				}).then(async () => {
+					let { status, data } = await Rolo.remove({ id });
+					if (status) {
+						//更新DOM
+						this.tableData.splice(index, 1);
+						this.$message.success('删除成功!');
+					}
+				}).catch(() => {
+					this.$message.info('取消删除');
+				});
+			},
+			//获取信息
+			handleInfo(id, name, index) {
+				this.$prompt('修改信息', '修改', {
 					inputPattern: /\S/,
-					inputErrorMessage: '请输入非空字符',
-					inputValue: name,
+					inputErrorMessage: '请输入字符',
+					inputValue: name
 				}).then(async ({ value }) => {
 					let { status } = await Rolo.edit(id, value);
 					if (status) {
@@ -179,60 +243,44 @@
 						this.tableData[index].name = value;
 					}
 				}).catch(() => {
-					this.$message.info('取消成功！');
+					this.$message.info('修改失败!');
 				});
 			},
-			//删除
-			handleDelete(id, index) {
-				this.$confirm('此操作将永久删除该文件, 是否继续?', '提示', {
-					type: 'warning'
-				}).then(async () => {
-					let { status } = await Rolo.remove({ id });
-					if (status) {
-						this.$message.success('删除成功');
-						//更新dom页面
-						this.tableData.splice(index, 1);
-					}
-				}).catch(() => {
-					this.$message.info('取消成功')
-				});
-			},
-			//点击添加按钮
-			openInsertModel() {
-				this.$prompt('请输入添加的角色名称', '添加角色', {
-					inputPattern: /\S/,
-					inputErrorMessage: '不能输入空白字符'
-				}).then(async ({ value }) => {
-					let { status, data } = await Rolo.insert({ name: value });
-					if (status) {
-						this.$message.success('添加成功');
-						//更新dom页面
-						this.tableData.push({ name: value, ...data }) //...data是把data用扩展运算符展开，data里面有id
-					}
-
-				}).catch(() => {
-					console.log(this.$message)
-					this.$message.info('取消成功');
-				});
-			},
-			async loadList() {
-				let { status, data } = await Rolo.list();
-				if (status) {
-					this.tableData = data;
-				}
-			}
-
+			//编辑角色信息
+			// submitForm(formName) {
+			// 	this.$refs[formName].validate(async (valid) => {
+			// 		if (valid) {
+			// 			let { status, msg } = await Rolo.edit(this.form);
+			// 			if (status) {
+			// 				this.$message.success('修改成功!');
+			// 				this.dialogFormVisible = false;
+			// 				//更新DOM======================================================================
+			// 			}
+			// 		} else {
+			// 			this.$message.info('修改失败!');
+			// 			return false;
+			// 		}
+			// 	});
+			// },
 		}
 	}
 </script>
 
 <style scoped>
-	.box {
+	.display {
 		display: flex;
+		justify-content: space-between;
+		flex: 1;
+	}
+
+	/* 模态框 */
+	.box {
+		width: 530px;
 	}
 
 	.box-right {
-		margin-bottom: 10px;
+		width: 740px;
+		margin: 0 0 10px 0;
 	}
 
 	.title-color {
@@ -243,8 +291,6 @@
 	.layout {
 		display: flex;
 		flex-direction: column;
-		width: calc(100% - 620px);
-		margin-left: 20px;
 	}
 
 	.listStyle {
@@ -253,25 +299,9 @@
 		font-size: 14px;
 	}
 
-	.role .text {
-		font-size: 14px;
-	}
-
-	.role {
-		width: 600px;
-	}
-
-	.role .item {
-		margin-bottom: 18px;
-	}
-
-	.role .clearfix:before,
-	.role .clearfix:after {
-		display: table;
-		content: "";
-	}
-
-	.role .clearfix:after {
-		clear: both
+	/* 超级管理员变色 */
+	.box .color {
+		background-color: #FEF0F0;
+		color: #F66C81;
 	}
 </style>

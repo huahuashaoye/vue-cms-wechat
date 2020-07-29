@@ -1,99 +1,94 @@
 <template>
-	<div class="NavBar">
-		<div class="icon_box">
-			<img src="../assets/img/logo.png" width="55%" alt="">
-			<i :class='isCollapse? "el-icon-s-fold":"el-icon-s-unfold"' @click="isShow"></i>
+	<div class="navbar">
+		<div class="navbar-logo">
+			<img src="../assets/img/logo.png" height="55px">
+			<i @click="handleclick" class="el-icon-s-fold"></i>
 		</div>
-		<el-dropdown>
-			<!-- {{username}} -->
-			<span class="el-dropdown-link">
-				<el-avatar :src="avatar"></el-avatar><span style="margin-left: 10px;font-size: 14px;">admin</span> <i class="el-icon-arrow-down el-icon--right"></i>
-			</span>
-			<el-dropdown-menu slot="dropdown">
-				<el-dropdown-item>消息</el-dropdown-item>
-				<el-dropdown-item>设置</el-dropdown-item>
-				<el-dropdown-item>退出</el-dropdown-item>
-			</el-dropdown-menu>
-		</el-dropdown>
+		<div class="navbar-select">
+			<el-menu class="el-menu-demo" mode="horizontal" background-color="#31404E" text-color="#fff" active-text-color="#ffd04b">
+				<el-submenu index="1">
+					<template slot="title">
+						<span class="el-dropdown-link" v-model="person">
+							<el-avatar :src="person.avatar" :size='30' class="img"></el-avatar>
+							{{person.username}}
+						</span>
+					</template>
+					<el-menu-item index="1-1">消息</el-menu-item>
+					<el-menu-item index="1-2">设置</el-menu-item>
+					<el-menu-item index="1-3">退出</el-menu-item>
+				</el-submenu>
+			</el-menu>
+		</div>
 	</div>
 </template>
 
-<script >
-	import New from '@/new.js'
+<script>
 	import { Admin } from '@/api/index'
 	export default {
 		data() {
 			return {
-				isCollapse: true,
-				username: '',
-				avatar: ""
+				person: [],
 			}
 		},
-		// async created() {
-		// 	var id = sessionStorage.id;
-		// 	let { data: { username, avatar } } = await admin.api({ id });
-		// 	this.username = username;
-		// 	this.avatar = avatar;
-
-		// 	New.$on('getisshow',(data)=>{
-		// 		console.log(this);
-		// 	})
-		// },
-		mounted() {
-			// New.$on('getisshow',(data)=>{
-			// 	console.log(this);
-			// })
+		created() {
+			//获取数据
+			this.loadinfo();
 		},
 		methods: {
-			isShow() {
-				this.isCollapse = !this.isCollapse;
-				this.$emit('change', this.isCollapse);
-			}
+			handleclick() {
+				this.$emit('change');
+			},
+			async loadinfo() {
+				var id = sessionStorage.id;
+				console.log(id)
+				let { status, data } = await Admin.api({ id });
+				if (status) {
+					this.person = data;
+					console.log(this.person)
+				}
+
+			},
 		}
 	}
 </script>
 
-<style scoped="scoped">
-	.icon_box {
-		display: flex;
-		cursor: pointer;
-		align-items: center;
-	}
-
-	.icon_box>.el-icon-s-fold,
-	.icon_box>.el-icon-s-unfold {
-		font-size: 25px;
-	}
-
-	.NavBar {
-		background-color: black;
-		color: white;
+<style>
+	.navbar {
+		background-color: #31404E;
 		height: 60px;
+		color: white;
 		line-height: 60px;
+		padding-left: 20px;
 		display: flex;
-		padding: 0 20PX;
 		justify-content: space-between;
+		padding-right: 20px;
 	}
 
-	.el-dropdown {
-		border-bottom: 2px solid orange;
+	.navbar-logo {
+		height: 60px;
+		box-sizing: border-box;
+	}
+
+	.el-icon-s-fold {
+		position: absolute;
+		top: 21px;
 	}
 
 	.el-dropdown-link {
 		cursor: pointer;
-		color: white;
+		color: #fff;
+		line-height: 60px;
+		vertical-align: middle;
 	}
 
 	.el-icon-arrow-down {
 		font-size: 12px;
 	}
 
-	.el-dropdown-link {
-		display: flex;
-		align-items: center;
-	}
-
-	.el-dropdown-menu {
-		width: 100px;
+	.el-avatar {
+		/* position: absolute;
+		top: 13px;
+		right: 100px; */
+		margin-right: 5px;
 	}
 </style>

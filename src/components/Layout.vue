@@ -3,12 +3,12 @@
 		<el-container>
 			<!-- 头部 -->
 			<el-header style="padding: 0px;height: auto;">
-				<NavBar></NavBar>
+				<NavBar @change="handlechange"></NavBar>
 			</el-header>
 			<el-container>
 				<!-- 左菜单 -->
 				<el-aside width="200px">
-					<LeftMenu></LeftMenu>
+					<LeftMenu :isCollapse="isCollapse"></LeftMenu>
 				</el-aside>
 				<!-- 右主题 -->
 				<el-main>
@@ -28,6 +28,20 @@
 		components: {
 			NavBar,
 			LeftMenu
+		},
+		data(){
+			return{
+				isCollapse:false
+			}
+		},
+		methods:{
+			handlechange(){
+				if(this.isCollapse== true){
+					this.isCollapse= false;
+				}else{
+					this.isCollapse= true;
+				}
+			}
 		}
 	}
 </script>

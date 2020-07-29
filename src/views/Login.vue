@@ -57,7 +57,7 @@
 
 						//储存Token，uid，role
 						sessionStorage.token = data.token;
-						sessionStorage.uid = data.id;
+						sessionStorage.id = data.id;
 						sessionStorage.role = data.role;
 						//成功提示
 						this.$message.success(msg);
@@ -67,7 +67,7 @@
 							this.$router.replace('/article/list');
 						} else {
 							// 默认跳转
-							this.$router.replace('/commodity/list');
+							this.$router.replace('/goods/list');
 						}
 					} else {
 						this.$message.error(msg);

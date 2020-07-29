@@ -22,99 +22,100 @@ const routes = [
 		//起别名,项目跳转主页
 		alias: '/',
 		name: 'Login',
-		component: () => import('@/views/Login.vue')
+		component: () => import('@/views/Login.vue'),
+		meta: { requiresAuth: false },
 
 	},
 	//注册
 	{
 		path: '/register',
 		name: 'Register',
-		component: () => import('@/views/Register.vue')
+		component: () => import('@/views/Register.vue'),
+		meta: { requiresAuth: false },
 	},
 	//商品路由
 	{
-		path: '/commodity/',
-		name: 'Commodity',
+		path: '/goods/',
+		name: 'Goods',
 		component: Layout,
-		//commodity开头的路由，都需要登录。
+		//goods开头的路由，都需要登录。
 		meta: { requiresAuth: true },
 		children: [{
 				path: 'list',
-				name: 'CommodityList',
-				component: () => import('@/views/Commodity/List.vue')
+				name: 'GoodsList',
+				component: () => import('@/views/Goods/List.vue')
 
 			},
 			{
 				path: 'release',
-				name: 'CommodityRelease',
-				component: () => import('@/views/Commodity/Release.vue')
+				name: 'GoodsRelease',
+				component: () => import('@/views/Goods/Release.vue')
 
 			},
 			{
 				path: 'edit/:id',
-				name: 'CommodityEdit',
-				component: () => import('@/views/Commodity/Edit.vue'),
+				name: 'GoodsEdit',
+				component: () => import('@/views/Goods/Edit.vue'),
 				props:true
 				
 			},
 			{
 				path: 'Category',
-				name: 'CommodityCategory',
-				component: () => import('@/views/Commodity/Category.vue')
+				name: 'GoodsCategory',
+				component: () => import('@/views/Goods/Category.vue')
 
 			},
 		]
 	},
 	{
-		path: '/Admin/',
-		name: 'Admin',
+		path: '/user/',
+		name: 'User',
 		component: Layout,
-		//Admin开头的路由，都需要登录。
+		//User开头的路由，都需要登录。
 		meta: { requiresAuth: true },
 		children: [{
 				path: 'list',
-				name: 'AdminList',
-				component: () => import('@/views/Admin/List.vue')
+				name: 'UserList',
+				component: () => import('@/views/User/List.vue')
 	
 			},
 			{
-				path: 'information',
-				name: 'AdminInformation',
-				component: () => import('@/views/Admin/Information.vue')
+				path: 'info',
+				name: 'UserInfo',
+				component: () => import('@/views/User/Info.vue')
 	
 			},
 			{
 				path: 'edit',
-				name: 'AdminEdit',
-				component: () => import('@/views/Admin/Edit.vue')
+				name: 'UserEdit',
+				component: () => import('@/views/User/Edit.vue')
 				
 			},
 	// 		{
 	// 			path: 'Category',
-	// 			name: 'AdminCategory',
-	// 			component: () => import('@/views/Admin/Category.vue')
+	// 			name: 'UserCategory',
+	// 			component: () => import('@/views/User/Category.vue')
 	
 	// 		},
 		]
 	},
 	{
-		path: '/Menu/',
-		name: 'Menu',
+		path: '/auth/',
+		name: 'Auth',
 		component: Layout,
-		//Menu开头的路由，都需要登录。
+		//auth开头的路由，都需要登录。
 		meta: { requiresAuth: true },
 		children: [{
-				path: 'list',
-				name: 'MenuList',
-				component: () => import('@/views/Menu/List.vue')
+				path: 'menu',
+				name: 'AuthMenu',
+				component: () => import('@/views/Auth/Menu.vue')
 	
 			},
-	// 		{
-	// 			path: 'information',
-	// 			name: 'MenuInformation',
-	// 			component: () => import('@/views/Menu/Information.vue')
-	
-	// 		},
+			{
+				path: 'role',
+				name: 'AuthRole',
+				component: () => import('@/views/Auth/Role.vue')
+			},
 			// {
 			// 	path: 'edit',
 			// 	name: 'MenuEdit',
@@ -130,27 +131,26 @@ const routes = [
 		]
 	},
 	{
-		path: '/Order/',
+		path: '/order/',
 		name: 'Order',
 		component: Layout,
-		//Order开头的路由，都需要登录。
-		meta: { requiresAuth: true },
+		//auth开头的路由，都需要登录。
+		meta: { requiresOrder: true },
 		children: [{
 				path: 'list',
 				name: 'OrderList',
 				component: () => import('@/views/Order/List.vue')
 	
 			},
-	// 		{
-	// 			path: 'information',
-	// 			name: 'OrderInformation',
-	// 			component: () => import('@/views/Order/Information.vue')
-	
-	// 		},
+			// {
+			// 	path: 'role',
+			// 	name: 'OrderRole',
+			// 	component: () => import('@/views/Order/Role.vue')
+			// },
 			// {
 			// 	path: 'edit',
-			// 	name: 'OrderEdit',
-			// 	component: () => import('@/views/Order/Edit.vue')
+			// 	name: 'MenuEdit',
+			// 	component: () => import('@/views/Menu/Edit.vue')
 				
 			// },
 	// 		{
